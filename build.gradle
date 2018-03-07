@@ -1,0 +1,39 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'com.palantir.git-version' version '0.10.1' // https://plugins.gradle.org/plugin/com.palantir.git-version
+    id 'com.gradle.plugin-publish' version '0.9.9' // https://plugins.gradle.org/plugin/com.gradle.plugin-publish
+}
+
+description = 'Gradle AWS Elastic Beanstalk plugin'
+group = 'de.jansauer.aws.beanstalk'
+version = gitVersion()
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude(module: 'groovy-all')
+    }
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-elasticbeanstalk', version: '1.11.290'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.290'
+}
+
+pluginBundle {
+    website = 'https://github.com/jansauer/gradle-elasticbeanstalk-plugin'
+    vcsUrl = 'https://github.com/jansauer/gradle-elasticbeanstalk-plugin'
+    description = 'Gradle Elastic Beanstalk plugin.'
+    tags = ['elasticbeanstag', 'aws', 'gitlab', 'amazon', 'clean']
+
+    plugins {
+        elasticBeanstalkPlugin {
+            id = 'de.jansauer.elasticbeanstalk'
+            displayName = 'Gradle Elastic Beanstalk plugin'
+        }
+    }
+}
