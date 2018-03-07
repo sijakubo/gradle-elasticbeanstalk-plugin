@@ -24,6 +24,9 @@ class CleanupVersionsTest extends Specification {
     @Shared
     AmazonS3 s3Client
 
+    @Shared
+    String s3BucketName
+
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
 
@@ -31,6 +34,7 @@ class CleanupVersionsTest extends Specification {
 
     def setupSpec() {
         applicationName = 'Gradle Plugin Test'
+        s3BucketName = 'elasticbeanstalk-eu-central-1-000354356830'
         s3Client = AmazonS3ClientBuilder.standard().withRegion('eu-central-1').build()
         client = AWSElasticBeanstalkClientBuilder.standard()
                 .withRegion('eu-central-1')
@@ -89,13 +93,13 @@ class CleanupVersionsTest extends Specification {
     }
 
     def createApplicationVersion(String version) {
-        s3Client.putObject('elasticbeanstalk-eu-central-1-000354356830', version + '.jar', version as String)
+        s3Client.putObject(s3BucketName, version + '.jar', version as String)
         client.createApplicationVersion(new CreateApplicationVersionRequest()
                 .withApplicationName(applicationName)
                 .withVersionLabel(version)
-                .withDescription("")
+                .withDescription("Test application version " + version)
                 .withSourceBundle(new S3Location()
-                .withS3Bucket('elasticbeanstalk-eu-central-1-000354356830')
+                .withS3Bucket(s3BucketName)
                 .withS3Key(version + '.jar'))
                 .withProcess(false));
     }
