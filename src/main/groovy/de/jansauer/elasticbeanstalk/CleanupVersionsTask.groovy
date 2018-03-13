@@ -17,13 +17,13 @@ class CleanupVersionsTask extends DefaultTask {
   final Property<Integer> versionToPreserve = project.objects.property(Integer)
 
   CleanupVersionsTask() {
-    setDescription("Cleanup unused ElasticBeanstalk Application Versions.")
-    setGroup("aws")
+    setDescription('Cleanup unused ElasticBeanstalk Application Versions.')
+    setGroup('aws')
   }
 
   @TaskAction
   def cleanupVersions() {
-    logger.info("Cleaning up elastic beanstalk versions for application '{}'", applicationName.get())
+    logger.debug("Cleaning up elastic beanstalk versions for application '{}'", applicationName.get())
     def client = AWSElasticBeanstalkClientBuilder.standard()
         .withRegion('eu-central-1')
         .build()
@@ -37,7 +37,7 @@ class CleanupVersionsTask extends DefaultTask {
           .withApplicationName(applicationName.get())
           .withVersionLabel(it.versionLabel)
           .withDeleteSourceBundle(true))
-      logger.debug("Beanstalk application version with label '${it.versionLabel}' was deleted.")
+      logger.info("Beanstalk application version with label '${it.versionLabel}' was deleted.")
     }
   }
 }

@@ -11,5 +11,6 @@ class ElasticBeanstalkExtension {
   ElasticBeanstalkExtension(Project project) {
     applicationName = project.objects.property(String)
     versionToPreserve = project.objects.property(Integer)
+    versionToPreserve.set(8)
   }
 }
