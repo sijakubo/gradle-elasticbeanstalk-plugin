@@ -28,7 +28,7 @@ pluginBundle {
     website = 'https://github.com/jansauer/gradle-elasticbeanstalk-plugin'
     vcsUrl = 'https://github.com/jansauer/gradle-elasticbeanstalk-plugin'
     description = 'Gradle Elastic Beanstalk plugin.'
-    tags = ['elasticbeanstag', 'aws', 'gitlab', 'amazon', 'clean']
+    tags = ['deployment', 'amazon', 'aws', 'elasticbeanstalk', 'gitlab', 'clean', 'versions']
 
     plugins {
         elasticBeanstalkPlugin {
