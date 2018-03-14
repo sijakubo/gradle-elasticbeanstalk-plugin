@@ -69,8 +69,10 @@ class CleanupVersionsTest extends Specification {
 
     when:
     def result = GradleRunner.create()
+        .withGradleVersion(gradleVersion)
         .withProjectDir(testProjectDir.root)
-        .withArguments('cleanupVersions', '-i')
+        .withArguments('cleanupVersions')
+        .withDebug(true)
         .withPluginClasspath()
         .build()
     print result.output
@@ -87,6 +89,9 @@ class CleanupVersionsTest extends Specification {
     remainingVersions.collectNested({
       it.versionLabel
     }) == ['1.0.0', '20.10.1-5-g4b03a14', '1.5.20-21-g4b03a14', '0.0.0']
+
+    where:
+    gradleVersion << ['4.5', '4.6']
   }
 
   def cleanupSpec() {
