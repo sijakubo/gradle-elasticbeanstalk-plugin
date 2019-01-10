@@ -91,7 +91,7 @@ class CleanupVersionsTest extends Specification {
     }) == ['1.0.0', '20.10.1-5-g4b03a14', '1.5.20-21-g4b03a14', '0.0.0']
 
     where:
-    gradleVersion << ['4.5', '4.6']
+    gradleVersion << ['4.5', '4.6', '4.7', '4.8', '4.8.1', '4.9', '4.10', '4.10.1', '4.10.2', '4.10.3']
   }
 
   def cleanupSpec() {
