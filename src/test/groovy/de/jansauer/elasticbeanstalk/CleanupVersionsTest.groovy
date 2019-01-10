@@ -34,7 +34,7 @@ class CleanupVersionsTest extends Specification {
 
   def setupSpec() {
     applicationName = 'Gradle Plugin Test'
-    s3BucketName = 'elasticbeanstalk-eu-central-1-000354356830'
+    s3BucketName = 'elasticbeanstalk-eu-central-1-640667059075'
     s3Client = AmazonS3ClientBuilder.standard().withRegion('eu-central-1').build()
     client = AWSElasticBeanstalkClientBuilder.standard()
         .withRegion('eu-central-1')
