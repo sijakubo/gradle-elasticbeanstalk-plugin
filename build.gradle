@@ -17,10 +17,8 @@ repositories {
 }
 
 dependencies {
-    // https://aws.amazon.com/sdk-for-java/
-    // https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/
-    compile 'com.amazonaws:aws-java-sdk-elasticbeanstalk:1.11.293'
-    compile 'com.amazonaws:aws-java-sdk-s3:1.11.293'
+    compile 'software.amazon.awssdk:elasticbeanstalk:2.3.0'
+    compile 'software.amazon.awssdk:s3:2.3.0'
 
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude(module: 'groovy-all')

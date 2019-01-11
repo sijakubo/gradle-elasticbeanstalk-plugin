@@ -1,13 +1,18 @@
 package de.jansauer.elasticbeanstalk
 
-import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk
-import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder
-import com.amazonaws.services.elasticbeanstalk.model.*
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import org.gradle.internal.impldep.org.junit.Rule
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.GradleRunner
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.elasticbeanstalk.ElasticBeanstalkClient
+import software.amazon.awssdk.services.elasticbeanstalk.model.CreateApplicationRequest
+import software.amazon.awssdk.services.elasticbeanstalk.model.CreateApplicationVersionRequest
+import software.amazon.awssdk.services.elasticbeanstalk.model.DeleteApplicationRequest
+import software.amazon.awssdk.services.elasticbeanstalk.model.DescribeApplicationVersionsRequest
+import software.amazon.awssdk.services.elasticbeanstalk.model.S3Location
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -19,13 +24,13 @@ class CleanupVersionsTest extends Specification {
   String applicationName
 
   @Shared
-  AWSElasticBeanstalk client
-
-  @Shared
-  AmazonS3 s3Client
+  S3Client s3Client
 
   @Shared
   String s3BucketName
+
+  @Shared
+  ElasticBeanstalkClient ebClient
 
   @Rule
   final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -35,12 +40,15 @@ class CleanupVersionsTest extends Specification {
   def setupSpec() {
     applicationName = 'Gradle Plugin Test'
     s3BucketName = 'elasticbeanstalk-eu-central-1-640667059075'
-    s3Client = AmazonS3ClientBuilder.standard().withRegion('eu-central-1').build()
-    client = AWSElasticBeanstalkClientBuilder.standard()
-        .withRegion('eu-central-1')
+    s3Client = S3Client.builder()
+        .region(Region.EU_CENTRAL_1)
         .build()
-    client.createApplication(new CreateApplicationRequest()
-        .withApplicationName(applicationName))
+    ebClient = ElasticBeanstalkClient.builder()
+        .region(Region.EU_CENTRAL_1)
+        .build()
+    ebClient.createApplication(CreateApplicationRequest.builder()
+        .applicationName(applicationName)
+        .build())
     createApplicationVersion('0.0.0')
     createApplicationVersion('1.0.0-2-g4b03a14')
     createApplicationVersion('1.0.2-20-g4b03a14')
@@ -81,9 +89,11 @@ class CleanupVersionsTest extends Specification {
     result.task(':cleanupVersions').outcome == SUCCESS
 
     when:
-    def remainingVersions = client.describeApplicationVersions(new DescribeApplicationVersionsRequest()
-        .withApplicationName(applicationName))
-        .getApplicationVersions()
+    def remainingVersions = ebClient.describeApplicationVersions(DescribeApplicationVersionsRequest.builder()
+        .applicationName(applicationName)
+        .build())
+        .applicationVersions()
+
     then:
     remainingVersions.size() == 4
     remainingVersions.collectNested({
@@ -91,22 +101,30 @@ class CleanupVersionsTest extends Specification {
     }) == ['1.0.0', '20.10.1-5-g4b03a14', '1.5.20-21-g4b03a14', '0.0.0']
 
     where:
-    gradleVersion << ['4.5', '4.6', '4.7', '4.8', '4.8.1', '4.9', '4.10', '4.10.1', '4.10.2', '4.10.3']
+    gradleVersion << ['4.5', '4.6', '4.7', '4.8', '4.8.1', '4.9', '4.10', '4.10.1', '4.10.2', '5.0', '4.10.3', '5.1', '5.1.1']
   }
 
   def cleanupSpec() {
-    client.deleteApplication(new DeleteApplicationRequest().withApplicationName(applicationName))
+    ebClient.deleteApplication(DeleteApplicationRequest.builder()
+        .applicationName(applicationName)
+        .build())
   }
 
   def createApplicationVersion(String version) {
-    s3Client.putObject(s3BucketName, version + '.jar', version as String)
-    client.createApplicationVersion(new CreateApplicationVersionRequest()
-        .withApplicationName(applicationName)
-        .withVersionLabel(version)
-        .withDescription('Test application version ' + version)
-        .withSourceBundle(new S3Location()
-            .withS3Bucket(s3BucketName)
-            .withS3Key(version + '.jar'))
-        .withProcess(false))
+    s3Client.putObject(PutObjectRequest.builder()
+        .bucket(s3BucketName)
+        .key(version + '.jar')
+        .build(),
+        RequestBody.fromString(version as String))
+    ebClient.createApplicationVersion(CreateApplicationVersionRequest.builder()
+        .applicationName(applicationName)
+        .versionLabel(version)
+        .description('Test application version ' + version)
+        .sourceBundle(S3Location.builder()
+            .s3Bucket(s3BucketName)
+            .s3Key(version + '.jar')
+            .build())
+        .process(false)
+        .build())
   }
 }

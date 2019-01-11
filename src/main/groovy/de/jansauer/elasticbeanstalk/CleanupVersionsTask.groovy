@@ -1,12 +1,13 @@
 package de.jansauer.elasticbeanstalk
 
-import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder
-import com.amazonaws.services.elasticbeanstalk.model.DeleteApplicationVersionRequest
-import com.amazonaws.services.elasticbeanstalk.model.DescribeApplicationVersionsRequest
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.elasticbeanstalk.ElasticBeanstalkClient
+import software.amazon.awssdk.services.elasticbeanstalk.model.DeleteApplicationVersionRequest
+import software.amazon.awssdk.services.elasticbeanstalk.model.DescribeApplicationVersionsRequest
 
 class CleanupVersionsTask extends DefaultTask {
 
@@ -24,20 +25,24 @@ class CleanupVersionsTask extends DefaultTask {
   @TaskAction
   def cleanupVersions() {
     logger.debug("Cleaning up elastic beanstalk versions for application '{}'", applicationName.get())
-    def client = AWSElasticBeanstalkClientBuilder.standard()
-        .withRegion('eu-central-1')
+    def client = ElasticBeanstalkClient.builder()
+        .region(Region.EU_CENTRAL_1)
         .build()
 
-    client.describeApplicationVersions(new DescribeApplicationVersionsRequest().withApplicationName(applicationName.get()))
-        .getApplicationVersions()
-        .findAll({ it.versionLabel ==~ /\d+\.\d+\.\d+-\d+-g.*/ })
+    client.describeApplicationVersions(DescribeApplicationVersionsRequest
+        .builder()
+            .applicationName(applicationName.get())
+            .build())
+        .applicationVersions()
+        .findAll({ it.versionLabel() ==~ /\d+\.\d+\.\d+-\d+-g.*/ })
         .drop(versionToPreserve.get())
         .each {
-      client.deleteApplicationVersion(new DeleteApplicationVersionRequest()
-          .withApplicationName(applicationName.get())
-          .withVersionLabel(it.versionLabel)
-          .withDeleteSourceBundle(true))
-      logger.info("Beanstalk application version with label '${it.versionLabel}' was deleted.")
+      client.deleteApplicationVersion(DeleteApplicationVersionRequest.builder()
+          .applicationName(applicationName.get())
+          .versionLabel(it.versionLabel())
+          .deleteSourceBundle(true)
+          .build())
+      logger.info("Beanstalk application version with label '${it.versionLabel()}' was deleted.")
     }
   }
 }
