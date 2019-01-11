@@ -1,9 +1,9 @@
 plugins {
-    id 'com.palantir.git-version' version '0.10.1' // https://plugins.gradle.org/plugin/com.palantir.git-version
+    id 'com.palantir.git-version' version '0.11.0'
     id 'groovy'
     id 'java-gradle-plugin'
     id 'jacoco'
-    id 'com.gradle.plugin-publish' version '0.9.10' // https://plugins.gradle.org/plugin/com.gradle.plugin-publish
+    id 'com.gradle.plugin-publish' version '0.10.0'
 }
 
 description = 'Gradle AWS Elastic Beanstalk plugin'
@@ -21,7 +21,7 @@ dependencies {
     compile 'software.amazon.awssdk:elasticbeanstalk:2.3.0'
     compile 'software.amazon.awssdk:s3:2.3.0'
 
-    testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
+    testCompile('org.spockframework:spock-core:1.2-groovy-2.5') {
         exclude(module: 'groovy-all')
     }
 }
