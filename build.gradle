@@ -1,7 +1,8 @@
 plugins {
+    id 'com.palantir.git-version' version '0.10.1' // https://plugins.gradle.org/plugin/com.palantir.git-version
     id 'groovy'
     id 'java-gradle-plugin'
-    id 'com.palantir.git-version' version '0.10.1' // https://plugins.gradle.org/plugin/com.palantir.git-version
+    id 'jacoco'
     id 'com.gradle.plugin-publish' version '0.9.10' // https://plugins.gradle.org/plugin/com.gradle.plugin-publish
 }
 
@@ -36,5 +37,13 @@ pluginBundle {
             id = 'de.jansauer.elasticbeanstalk'
             displayName = 'Gradle Elastic Beanstalk plugin'
         }
+    }
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled false
     }
 }
